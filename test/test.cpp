@@ -162,8 +162,24 @@ TEST_CASE("Test reverse"){
                 std::make_pair(2, 2),
                 std::make_pair(1, 1)
                 };
+        Audio<int8_t> mono8bit_reversed(sample_array_8_1_reversed, sample_rate);
+        Audio<std::pair<int8_t, int8_t>> stereo8bit_reversed(sample_array_8_2_reversed, sample_rate);
+        Audio<int16_t> mono16bit_reversed(sample_array_16_1_reversed, sample_rate);
+        Audio<std::pair<int16_t, int16_t>> stereo16bit_reversed(sample_array_16_2_reversed, sample_rate);
 
-        REQUIRE(1==0);
+        Audio<int8_t> mono8bit_result(mono8bit);
+        Audio<int16_t> mono16bit_result(mono16bit);
+        Audio<std::pair<int8_t, int8_t>> stereo8bit_result(stereo8bit);
+        Audio<std::pair<int16_t, int16_t>> stereo16bit_result(stereo16bit);
+        mono8bit_result.reverse();
+        mono16bit_result.reverse();
+        stereo8bit_result.reverse();
+        stereo16bit_result.reverse();
+
+        REQUIRE(mono8bit_result == mono8bit_reversed);
+        REQUIRE(mono16bit_result == mono16bit_reversed);
+        REQUIRE(stereo8bit_result == stereo8bit_reversed);
+        REQUIRE(stereo16bit_result == stereo16bit_reversed);
 }
 
 TEST_CASE("Test compute rms"){

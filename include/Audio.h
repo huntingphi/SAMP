@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <numeric>
 
 template <typename T>
 class Audio
@@ -28,6 +30,7 @@ class Audio
     Audio operator+(const Audio &);
     Audio &operator^(const std::pair<float, float>);
     Audio &operator*(const std::pair<float, float>);
+    void reverse();
     std::string toString() const;
 
     static int MAX_INT8;
@@ -122,6 +125,11 @@ Audio<T>& Audio<T>::operator^(const std::pair<float, float>){
 template <typename T>
 Audio<T>& Audio<T>::operator*(const std::pair<float, float>){
     
+}
+template <typename T>
+void Audio<T>::reverse()
+{
+    std::reverse(data.begin(),data.end());
 }
 
 template <typename T>

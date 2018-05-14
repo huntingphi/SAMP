@@ -1,9 +1,9 @@
-# SAMP
+# SAMP: Simple Audio Manipulation Program
 
 ## Brief
 
-Write app to process audio sound clips.
-Should be possible to perform simple editing operations on audio such as cut and paste, and transforming the sound clips. Example transformations include fade in/out and [normalisation](#normalisation).
+Write a C++ application to process audio sound clips.
+It should be possible to perform simple editing operations on audio such as cut and paste, and transforming the sound clips. Example transformations include fade in/out and [normalisation](#normalisation).
 The soundclips will be 1-channel (mono) or 2-channel (stereo) and will be provided as simple raw byte data which needs to be correctly interpreted.
 A raw sound file/clip is a sequence of [samples](#samples) (usually 8-, 16- or 24-bit) of an audio signal that can be sent to an audio speaker to produce sound. The audio also has a [sample rate.](#sample-rate) The higher the sample rate the better the quality of the sound produced. The number of bits per sample also affects audio quality. Higher bitrate results in better audio quality but also larger files. To balance this out compression is used, but is not neccessary in this prac. Simple raw (byte stream) audio will be used throughout.
 
@@ -91,7 +91,7 @@ The following operators will be overloaded to achieve basic editing.
 
   * `A | B` **Concatenate** audio file A and B (A and B must have the same sampling, sample size and mono/stereo settings)
   * `A * F` **Volume factor** A with F where a is a `std::pair<float,float>` with each float in range [0.0,1.0] The pair allows us to pack a separate volume scale for left and right channels. To apply the operation, each sample is multiplied by the volume factor. For mono, only the the first number will be used. This will allow one channel to be made louder or softer than another.
-  * `A + B` **Add amplitudes of audio file A and B** (A and B must have the same sampling, sample size and mono/stereo settings). Each resulting amplitude must be clamped to the maximum value of the sample type, where the maximum value for an N bit integer is **2<sup>N-1</sup>-1 **
+  * `A + B` **Add amplitudes of audio file A and B** (A and B must have the same sampling, sample size and mono/stereo settings). Each resulting amplitude must be clamped to the maximum value of the sample type, where the maximum value for an N bit integer is **2<sup>N-1</sup>-1**
   * Adding two very loud files may result in [saturation](#saturation)
   * `A^F` **Cut** from an audio file A, a region from a start to end given by F where F is a  `std::pair<int,int>`
   * **The big 6 must be overloaded**
@@ -106,18 +106,17 @@ STL algorithms must be used with custom [Functors](#functors) or [Lambdas](#lamd
   * **Reverse:** reverse all samples. This can be done very quickly with the STL.
   * **Ranged add:** select two same length samples from two signals and add them together. This is different from the `+ operator` which adds entire audio clips together. This should be achieved by using `std::copy` and the previously defined `+operator`
   * **Compute RMS:** use `std::accumulate` in `<numeric>` along with a custom [lambda](#lambda) to compute the RMS (per channel) according to the following formula:
-    <!-- % RMS= \sqrt{(\frac{1}{M}   \sum_{i=0}^{M-1} x^{2}_i )} % -->
-    <!-- http://www.sciweavers.org/tex2img.php?eq=RMS%3D%20%5Csqrt%7B%28%5Cfrac%7B1%7D%7BM%7D%20%20%20%5Csum_%7Bi%3D0%7D%5E%7BM-1%7D%20x%5E%7B2%7D_i%20%29%7D&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0 -->
-      <img src="http://www.sciweavers.org/tex2img.php?eq=RMS%3D%20%5Csqrt%7B%28%5Cfrac%7B1%7D%7BM%7D%20%20%20%5Csum_%7Bi%3D0%7D%5E%7BM-1%7D%20x%5E%7B2%7D_i%20%29%7D%20&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0" align="center" border="0" alt="RMS= \sqrt{(\frac{1}{M}   \sum_{i=0}^{M-1} x^{2}_i )} " width="165" height="68" />
+  
+      <a href="http://www.codecogs.com/eqnedit.php?latex=RMS=&space;\sqrt{(\frac{1}{M}&space;\sum_{i=0}^{M-1}&space;x^{2}_i&space;)}" target="_blank"><img src="http://latex.codecogs.com/gif.latex?RMS=&space;\sqrt{(\frac{1}{M}&space;\sum_{i=0}^{M-1}&space;x^{2}_i&space;)}" title="RMS= \sqrt{(\frac{1}{M} \sum_{i=0}^{M-1} x^{2}_i )}" /></a>
 
       This can be seen as the average volume of the sound clip
   * **Sound normalisation** Use  `std::transform` with a custom functor to normalise the sound files to a specified RMS value per channel. This will require the current RMS to be computed before the normalisation. The functor should work with both mono and stereo files.
 
   Normalisation can be done according to the following formula:
-<!-- outputAmp = inputAmp \multiply  \frac{RMS_d_e_s_i_r_e_d}{RMS_c_u_r_r_e_n_t}  -->
-  <img src="http://www.sciweavers.org/tex2img.php?eq=outputAmp%20%3D%20inputAmp%20%5Cmultiply%20%20%5Cfrac%7BRMS_d_e_s_i_r_e_d%7D%7BRMS_c_u_r_r_e_n_t%7D%20&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0" align="center" border="0" alt="outputAmp = inputAmp \multiply  \frac{RMS_d_e_s_i_r_e_d}{RMS_c_u_r_r_e_n_t} " width="300" height="46" />
+  
+  <a href="http://www.codecogs.com/eqnedit.php?latex=outputAmp&space;=&space;inputAmp&space;\frac{RMS_{desired}}{RMS_{current}}" target="_blank"><img src="http://latex.codecogs.com/gif.latex?outputAmp&space;=&space;inputAmp&space;\frac{RMS_{desired}}{RMS_{current}}" title="outputAmp = inputAmp \frac{RMS_{desired}}{RMS_{current}}" /></a>
 
-  This effectively increases the overall volume of a sound clip to the desired level and can be used to normalise between audio clips. The output amplitudes must be clamped to the maximum values of the sample type, where the maximum value for an N bit integer is **2<sup>N-1</sup>-1 **.
+  This effectively increases the overall volume of a sound clip to the desired level and can be used to normalise between audio clips. The output amplitudes must be clamped to the maximum values of the sample type, where the maximum value for an N bit integer is **2<sup>N-1</sup>-1**.
 
 ## Fading in and out
 
@@ -233,7 +232,6 @@ std::for_each(vec.begin(), vec.end(), print); // prints all elements
 
 >"In C++11, a lambda expression—often called a lambda—is a convenient way of defining an anonymous function object right at the location where it is invoked or passed as an argument to a function.
 >Typically lambdas are used to encapsulate a few lines of code that are passed to algorithms or asynchronous methods."
-
 >-[MSDN - Microsoft](https://msdn.microsoft.com/en-us/library/dd293608.aspx)
 
 > Example:
