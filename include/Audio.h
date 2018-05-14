@@ -22,7 +22,12 @@ class Audio
     Audio(T t);
     Audio& operator=(const Audio&);
     Audio& operator=(Audio&&);
+    bool operator==(const Audio&) const;
     std::vector<T> getData() const;
+    Audio operator|(const Audio &);
+    Audio operator+(const Audio &);
+    Audio &operator^(const std::pair<float, float>);
+    Audio &operator*(const std::pair<float, float>);
     std::string toString() const;
 
     static int MAX_INT8;
@@ -41,35 +46,82 @@ Audio<T>::Audio(std::vector<std::pair<int8_t, int8_t>> values, int s_rate) : cha
 template <typename T>
 Audio<T>::Audio(std::vector<std::pair<int16_t, int16_t>> values, int s_rate) : channels(2), size(values.size()), bits(16), sample_rate(s_rate), data(values){};
 template <typename T>
-Audio<T>::Audio()
-    : data()
-{
-}
-
+Audio<T>::Audio() : channels(0), size(0),bits(0),sample_rate(0), data(std::vector<T>{}){}
 template <typename T>
-Audio<T>::Audio(const Audio& other){
-    Audio a(other.getData(),other.sample_rate);
-    return a;
+Audio<T>::Audio(const Audio& other) : channels(other.channels),size(other.size),bits(other.bits),sample_rate(other.sample_rate),data(other.data){
 }
 template <typename T>
-Audio<T>::Audio(Audio &&){}
+Audio<T>::Audio(Audio && other) : channels(0), size(0), bits(0), sample_rate(0), data(std::vector<T>{}) {
+    channels = other.channels;
+    size = other.size;
+    bits = other.bits;
+    sample_rate = other.sample_rate;
+    data = std::move(other.data);
+    other.channels = 0;
+    other.bits = 0;
+    other.size = 0;
+    other.sample_rate = 0;
+    other.data = std::vector<T>{};
+}
+// template <typename T>
+// Audio<T>::Audio(T t) : data(t) {}
 template <typename T>
-Audio<T>::Audio(T t){}
+Audio<T>& Audio<T>::operator=(const Audio& other) {
+    channels = other.channels;
+    size = other.size;
+    bits = other.bits;
+    sample_rate = other.sample_rate;
+    data = other.data;
+}
 template <typename T>
-Audio<T>::Audio &operator=(const Audio &){}
+Audio<T>& Audio<T>::operator=(Audio && other){
+    channels = 0;
+    bits = 0;
+    size = 0;
+    sample_rate=0;
+    data = std::vector<T>{};
+    channels = other.channels;
+    size = other.size;
+    bits = other.bits;
+    sample_rate = other.sample_rate;
+    data = std::move(other.data);
+    other.channels = 0;
+    other.bits = 0;
+    other.size = 0;
+    other.sample_rate = 0;
+    other.data = std::vector<T>{};
+}
 template <typename T>
-Audio<T>::Audio &operator=(Audio &&){}
-
-template <typename T>
-Audio<T>::Audio(T t)
-    : data(t)
-{
+bool Audio<T>::operator==(const Audio& other) const{
+    return 
+    channels == other.channels &&
+    size == other.size &&
+    bits == other.bits &&
+    sample_rate == other.sample_rate &&
+    data == other.data;
 }
 
 template <typename T>
 std::vector<T> Audio<T>::getData() const
 {
     return data;
+}
+
+template <typename T>
+Audio<T> Audio<T>::operator|(const Audio &){
+
+}
+template <typename T>
+Audio<T> Audio<T>::operator+(const Audio &){
+
+}
+template <typename T>
+Audio<T>& Audio<T>::operator^(const std::pair<float, float>){
+    
+}
+template <typename T>
+Audio<T>& Audio<T>::operator*(const std::pair<float, float>){
+    
 }
 
 template <typename T>
