@@ -17,19 +17,21 @@ VPATH = test src include bin build
 
 
 
-test: 000-CatchMain.o test.o
+test: 000-CatchMain.o Audio.o test.o
 	$(CXX) $(CXXFLAGS) -I ./include -o bin/test build/000-CatchMain.o build/test.o
 	./bin/test --success
+
+	# $(CXX) $(CXXFLAGS) -I ./include -o bin/test build/000-CatchMain.o build/Audio.o build/test.o
 
 driver.o: driver.cpp
 	$(CXX) $(CXXFLAGS) -c src/driver.cpp -o build/driver.o
 # tests-huffmannode.o: tests-huffmannode.cpp
 	# $(CXX) $(CXXFLAGS) -c test/tests-huffmannode.cpp -o build/tests-huffmannode.o
 
-# HuffmanNode.o: HuffmanNode.cpp
-	# $(CXX) $(CXXFLAGS) -I ./include -c src/HuffmanNode.cpp -o build/HuffmanNode.o
+Audio.o: Audio.cpp
+	# $(CXX) $(CXXFLAGS) -I ./include -c src/Audio.cpp -o build/Audio.o
 
-test.o: test.cpp
+test.o: test.cpp Audio.h
 	$(CXX) $(CXXFLAGS) -c test/test.cpp -o build/test.o
 
 
