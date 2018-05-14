@@ -47,6 +47,20 @@ Audio<T>::Audio()
 }
 
 template <typename T>
+Audio<T>::Audio(const Audio& other){
+    Audio a(other.getData(),other.sample_rate);
+    return a;
+}
+template <typename T>
+Audio<T>::Audio(Audio &&){}
+template <typename T>
+Audio<T>::Audio(T t){}
+template <typename T>
+Audio<T>::Audio &operator=(const Audio &){}
+template <typename T>
+Audio<T>::Audio &operator=(Audio &&){}
+
+template <typename T>
 Audio<T>::Audio(T t)
     : data(t)
 {
