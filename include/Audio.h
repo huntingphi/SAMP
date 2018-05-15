@@ -128,15 +128,16 @@ T clamp(T val)
 }
 template <typename T>
 Audio<T>& Audio<T>::operator+(const Audio &other){
-    for (std::vector<int>::size_type i = 0; i != data.size(); i++)
+    for (std::vector<int>::size_type i = 0; i < data.size(); i++)
     {
+        // std::cout<<(int)i<<"vs"<<data.size()<<std::endl;
         data[i] = clamp(data[i]+other.data[i]);
     }
 }
 template <>
 Audio<std::pair<int8_t, int8_t>>& Audio<std::pair<int8_t, int8_t>>::operator+(const Audio &other)
 {
-    for (std::vector<int>::size_type i = 0; i != data.size(); i++)
+    for (std::vector<int>::size_type i = 0; i < data.size(); i++)
     {
         // other.data
         data[i].first = clamp(data[i].first + other.data[i].first);
@@ -147,7 +148,7 @@ Audio<std::pair<int8_t, int8_t>>& Audio<std::pair<int8_t, int8_t>>::operator+(co
 template <>
 Audio<std::pair<int16_t, int16_t>>& Audio<std::pair<int16_t, int16_t>>::operator+(const Audio &other)
 {
-    for (std::vector<int>::size_type i = 0; i != data.size(); i++)
+    for (std::vector<int>::size_type i = 0; i < data.size(); i++)
     {
         other.getData();
         data[i].first = clamp(data[i].first + other.data[i].first);
