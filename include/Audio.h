@@ -133,7 +133,7 @@ Audio<T>& Audio<T>::operator+(const Audio &other){
         // std::cout<<(int)i<<"vs"<<data.size()<<std::endl;
         data[i] = clamp(data[i]+other.data[i]);
     }
-    return this;
+    return *this;
 }
 template <>
 Audio<std::pair<int8_t, int8_t>>& Audio<std::pair<int8_t, int8_t>>::operator+(const Audio &other)
@@ -144,6 +144,7 @@ Audio<std::pair<int8_t, int8_t>>& Audio<std::pair<int8_t, int8_t>>::operator+(co
         data[i].first = clamp(data[i].first + other.data[i].first);
         data[i].second = clamp(data[i].second + other.data[i].second);
         }
+        return *this;
 }
 
 template <>
@@ -155,6 +156,7 @@ Audio<std::pair<int16_t, int16_t>>& Audio<std::pair<int16_t, int16_t>>::operator
         data[i].first = clamp(data[i].first + other.data[i].first);
         data[i].second = clamp(data[i].second + other.data[i].second);
     }
+    return *this;
 }
 
 template <typename T>

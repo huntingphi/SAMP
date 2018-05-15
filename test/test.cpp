@@ -321,14 +321,18 @@ TEST_CASE("Test +operator"){
         Audio<std::pair<int16_t, int16_t>> stereo16bit_to_add_2(stereo16bit);
 
         Audio<int8_t> mono8bit_result = mono8bit_to_add_1+mono8bit_to_add_2;
-        // Audio<int16_t> mono16bit_result = mono16bit_to_add_1 + mono16bit_to_add_2;
-        // Audio<std::pair<int8_t, int8_t>> stereo8bit_result = stereo8bit_to_add_1 + stereo8bit_to_add_2;
-        // Audio<std::pair<int16_t, int16_t>> stereo16bit_result = stereo16bit_to_add_1 + stereo16bit_to_add_2;
+        Audio<int16_t> mono16bit_result = mono16bit_to_add_1 + mono16bit_to_add_2;
+        Audio<std::pair<int8_t, int8_t>> stereo8bit_result = stereo8bit_to_add_1 + stereo8bit_to_add_2;
+        Audio<std::pair<int16_t, int16_t>> stereo16bit_result = stereo16bit_to_add_1 + stereo16bit_to_add_2;
 
-        // REQUIRE(mono8bit_result.getData() == result_8_1);
-        // REQUIRE(mono16bit_result.getData() == result_16_1);
-        // REQUIRE(stereo8bit_result.getData() == result_8_2);
-        // REQUIRE(stereo16bit_result.getData() == result_16_2);
+        REQUIRE(mono8bit_result.getData() == result_8_1);
+        REQUIRE(mono16bit_result.getData() == result_16_1);
+        REQUIRE(stereo8bit_result.getData() == result_8_2);
+        REQUIRE(stereo16bit_result.getData() == result_16_2);
+}
+
+TEST_CASE("Test fade in"){
+        REQUIRE(1==0);
 }
 
 TEST_CASE("Test fade out"){
