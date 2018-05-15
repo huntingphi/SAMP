@@ -26,6 +26,10 @@ TEST_CASE("Test constructor"){
         REQUIRE(a_8_2_expected == a_8_2_resulting);
         REQUIRE(a_16_1_expected == a_16_1_resulting);
         REQUIRE(a_16_2_expected == a_16_2_resulting);
+        REQUIRE(mono8bit.getData()==sample_array_8_1);
+        REQUIRE(mono16bit.getData()==sample_array_16_1);
+        REQUIRE(stereo8bit.getData() == sample_array_8_2);
+        REQUIRE(stereo16bit.getData() == sample_array_16_2);
 }
 TEST_CASE("Test destructor"){
         REQUIRE(1==0);
@@ -183,7 +187,15 @@ TEST_CASE("Test reverse"){
 }
 
 TEST_CASE("Test compute rms"){
-        REQUIRE(1==0);
+        Audio<int8_t> mono8bit_result(mono8bit);
+        Audio<int16_t> mono16bit_result(mono16bit);
+        Audio<std::pair<int8_t, int8_t>> stereo8bit_result(stereo8bit);
+        Audio<std::pair<int16_t, int16_t>> stereo16bit_result(stereo16bit);
+
+        REQUIRE(mono8bit_result.computeRMS() == 11.0f);
+        REQUIRE(mono16bit_result.computeRMS() == 11.0f);
+        REQUIRE(stereo8bit_result.computeStereoRMS() == std::make_pair((float)38.5,(float)38.5));
+        REQUIRE(stereo16bit_result.computeStereoRMS() == std::make_pair((float)38.5, (float)38.5));
 }
 
 TEST_CASE("Test cut"){
