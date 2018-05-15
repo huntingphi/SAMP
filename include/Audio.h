@@ -27,14 +27,15 @@ class Audio
     Audio& operator=(Audio&&);
     bool operator==(const Audio&) const;
     std::vector<T> getData() const;
-    Audio operator|(const Audio &);
+    Audio &operator|(const Audio &);
     Audio &operator+(const Audio &);
     Audio &operator^(const std::pair<int, int>);
     Audio &operator*(const std::pair<float, float>);
     void normalize(std::pair<float,float> rms_desired);
     void reverse();
     float computeRMS();
-    std::pair<float,float> computeStereoRMS();
+    Audio &add( Audio &, std::pair<int, int> range_this, std::pair<int, int> range_other);
+    std::pair<float, float> computeStereoRMS();
     std::string toString() const;
 
     static int MAX_INT8;
@@ -115,8 +116,11 @@ std::vector<T> Audio<T>::getData() const
 }
 
 template <typename T>
-Audio<T> Audio<T>::operator|(const Audio &){
-
+Audio<T>& Audio<T>::operator|(const Audio & other){
+    data.resize(data.size() + other.data.size());
+    std::copy(other.data.begin(), other.data.end(), std::inserter(data, data.end()));
+    size = data.size();
+    return *this;
 }
 
 template<typename T>
@@ -130,7 +134,7 @@ template <typename T>
 Audio<T>& Audio<T>::operator+(const Audio &other){
     for (std::vector<int>::size_type i = 0; i < data.size(); i++)
     {
-        // std::cout<<(int)i<<"vs"<<data.size()<<std::endl;
+        // std::cout << (int)data[i] << " + " << (int)other.data[i] << std::endl;
         data[i] = clamp(data[i]+other.data[i]);
     }
     return *this;
@@ -166,6 +170,7 @@ Audio<T>& Audio<T>::operator^(const std::pair<int, int> range){
     range.second>=data.size()? f = size:f=range.second+1;
     std::vector<T>(data.begin() + i, data.begin()+f).swap(data);//Use swap for memory efficiency
     size = data.size();
+    return *this;
 }
 class factor
 {
@@ -316,6 +321,17 @@ template <>
 void Audio<int16_t>::normalize(std::pair<float, float> rms_desired)
 {
     std::transform(data.begin(), data.end(), data.begin(), normal(rms_desired, std::make_pair(computeRMS(),0.0f)));
+}
+
+template <typename T>
+Audio<T>& Audio<T>::add( Audio& other, std::pair<int,int> range_this,std::pair<int,int> range_other){
+    // return (*this^(range_this))+ (other^range_other);
+    (*this^range_this) + (other^range_other);
+    // *this ^ range_this + other ^ range_other;
+
+    // *this^range_this;
+    // other^range_other;
+    return (*this);
 }
 
 
