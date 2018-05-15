@@ -117,7 +117,7 @@ std::vector<T> Audio<T>::getData() const
 
 template <typename T>
 Audio<T>& Audio<T>::operator|(const Audio & other){
-    data.resize(data.size() + other.data.size());
+    data.reserve(data.size() + other.data.size());
     std::copy(other.data.begin(), other.data.end(), std::inserter(data, data.end()));
     size = data.size();
     return *this;
