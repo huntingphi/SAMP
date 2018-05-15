@@ -133,6 +133,7 @@ Audio<T>& Audio<T>::operator+(const Audio &other){
         // std::cout<<(int)i<<"vs"<<data.size()<<std::endl;
         data[i] = clamp(data[i]+other.data[i]);
     }
+    return this;
 }
 template <>
 Audio<std::pair<int8_t, int8_t>>& Audio<std::pair<int8_t, int8_t>>::operator+(const Audio &other)
