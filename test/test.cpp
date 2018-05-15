@@ -5,9 +5,36 @@
 int sample_rate = 44100;
 std::vector<int8_t> sample_array_8_1 = {1, 2, 3, 4, 5, 1, 2, 3, 4, 5};
 std::vector<int16_t> sample_array_16_1 = {1, 2, 3, 4, 5, 1, 2, 3, 4, 5};
+std::vector<int8_t> another_sample_array_8_1 = {5, 4, 3, 2, 1, 5, 4, 3, 2, 1};
+std::vector<int16_t> another_sample_array_16_1 = {5, 4, 3, 2, 1, 5, 4, 3, 2, 1};
 std::vector<std::pair<int8_t, int8_t>> sample_array_8_2 = {std::make_pair(1, 1), std::make_pair(2, 2), std::make_pair(3, 3), std::make_pair(4, 4), std::make_pair(5, 5), std::make_pair(6, 6), std::make_pair(7, 7), std::make_pair(8, 8), std::make_pair(9, 9), std::make_pair(10, 10)};
 std::vector<std::pair<int16_t, int16_t>> sample_array_16_2 = {std::make_pair(1, 1), std::make_pair(2, 2), std::make_pair(3, 3), std::make_pair(4, 4), std::make_pair(5, 5), std::make_pair(6, 6), std::make_pair(7, 7), std::make_pair(8, 8), std::make_pair(9, 9), std::make_pair(10, 10)};
-
+std::vector<std::pair<int8_t, int8_t>> another_sample_array_8_2 =
+    {
+        std::make_pair(10, 1),
+        std::make_pair(9, 2),
+        std::make_pair(8, 3),
+        std::make_pair(7, 4),
+        std::make_pair(6, 5),
+        std::make_pair(5, 6),
+        std::make_pair(4, 7),
+        std::make_pair(3, 8),
+        std::make_pair(2, 9),
+        std::make_pair(1, 10)
+        };
+std::vector<std::pair<int16_t, int16_t>> another_sample_array_16_2 =
+    {
+        std::make_pair(10, 1),
+        std::make_pair(9, 2),
+        std::make_pair(8, 3),
+        std::make_pair(7, 4),
+        std::make_pair(6, 5),
+        std::make_pair(5, 6),
+        std::make_pair(4, 7),
+        std::make_pair(3, 8),
+        std::make_pair(2, 9),
+        std::make_pair(1, 10)
+        };
 Audio<int8_t> mono8bit(sample_array_8_1, sample_rate);
 Audio<std::pair<int8_t, int8_t>> stereo8bit(sample_array_8_2, sample_rate);
 Audio<int16_t> mono16bit(sample_array_16_1, sample_rate);
@@ -117,25 +144,6 @@ TEST_CASE("Test move assignment"){
         REQUIRE(stereo16bit == stereo16bit_result);
 }
 
-// TEST_CASE("Test iterator begin"){
-
-
-//         REQUIRE(1==0);
-// }
-
-
-// TEST_CASE("Test iterator end"){
-//         REQUIRE(1==0);
-// }
-
-
-// TEST_CASE("Test iterator++"){
-//         REQUIRE(1==0);
-// }
-
-// TEST_CASE("Test iterator--"){
-//         REQUIRE(1==0);
-// }
 
 TEST_CASE("Test reverse"){
         std::vector<int8_t> sample_array_8_1_reversed = {5, 4, 3, 2, 1, 5, 4, 3, 2, 1};
@@ -153,6 +161,32 @@ TEST_CASE("Test reverse"){
                 std::make_pair(2, 2),
                 std::make_pair(1, 1)
                 };
+        std::vector<std::pair<int8_t, int8_t>> another_sample_array_8_2_reversed =
+            {
+                std::make_pair(1, 10),
+                std::make_pair(2, 9),
+                std::make_pair(3, 8),
+                std::make_pair(4, 7),
+                std::make_pair(5, 6),
+                std::make_pair(6, 5),
+                std::make_pair(7, 4),
+                std::make_pair(8, 3),
+                std::make_pair(9, 2),
+                std::make_pair(10, 1)
+                };
+        std::vector<std::pair<int16_t, int16_t>> another_sample_array_16_2_reversed =
+            {
+                std::make_pair(1, 10),
+                std::make_pair(2, 9),
+                std::make_pair(3, 8),
+                std::make_pair(4, 7),
+                std::make_pair(5, 6),
+                std::make_pair(6, 5),
+                std::make_pair(7, 4),
+                std::make_pair(8, 3),
+                std::make_pair(9, 2),
+                std::make_pair(10, 1)
+                };
         std::vector<std::pair<int16_t, int16_t>> sample_array_16_2_reversed =
             {
                 std::make_pair(10, 10),
@@ -164,8 +198,7 @@ TEST_CASE("Test reverse"){
                 std::make_pair(4, 4),
                 std::make_pair(3, 3),
                 std::make_pair(2, 2),
-                std::make_pair(1, 1)
-                };
+                std::make_pair(1, 1)};
         Audio<int8_t> mono8bit_reversed(sample_array_8_1_reversed, sample_rate);
         Audio<std::pair<int8_t, int8_t>> stereo8bit_reversed(sample_array_8_2_reversed, sample_rate);
         Audio<int16_t> mono16bit_reversed(sample_array_16_1_reversed, sample_rate);
@@ -184,6 +217,21 @@ TEST_CASE("Test reverse"){
         REQUIRE(mono16bit_result == mono16bit_reversed);
         REQUIRE(stereo8bit_result == stereo8bit_reversed);
         REQUIRE(stereo16bit_result == stereo16bit_reversed);
+
+        //Test that it works when pair.first != pair.second
+        Audio<std::pair<int8_t, int8_t>> another_stereo8bit_result(another_sample_array_8_2,sample_rate);
+        Audio<std::pair<int16_t, int16_t>> another_stereo16bit_result(another_sample_array_16_2,sample_rate);
+        another_stereo8bit_result.reverse();
+        another_stereo16bit_result.reverse();
+        Audio<std::pair<int8_t, int8_t>> another_stereo8bit_reversed(another_sample_array_8_2_reversed, sample_rate);
+        Audio<std::pair<int16_t, int16_t>> another_stereo16bit_reversed(another_sample_array_16_2_reversed, sample_rate);
+
+        // std::cout << (int)(*another_stereo8bit_result.getData().begin()).first << ":" << (int)(*another_stereo8bit_result.getData().begin()).second << std::endl;
+        // another_stereo8bit_result.reverse();
+        // std::cout << (int)(*(another_stereo8bit_result.getData().end() - 1)).first << ":" << (int)(*(another_stereo8bit_result.getData().end() - 1)).second << std::endl;
+
+        REQUIRE(another_stereo8bit_result == another_stereo8bit_reversed);
+        REQUIRE(another_stereo16bit_result == another_stereo16bit_reversed);
 }
 
 TEST_CASE("Test compute rms"){
@@ -241,9 +289,6 @@ TEST_CASE("Test cut"){
         REQUIRE(stereo16bit_result.getData() == result_16_2);
 }
 
-TEST_CASE("Test ranged add"){
-        REQUIRE(1==0);
-}
 
 TEST_CASE("Test concatinate"){
         REQUIRE(1==0);
@@ -330,6 +375,49 @@ TEST_CASE("Test +operator"){
         REQUIRE(stereo8bit_result.getData() == result_8_2);
         REQUIRE(stereo16bit_result.getData() == result_16_2);
 }
+
+TEST_CASE("Test ranged add"){
+        Audio<int8_t> mono8bit(mono8bit);
+        Audio<int16_t> mono16bit(mono16bit);
+        Audio<int8_t> another_mono8bit(mono8bit);
+        Audio<int16_t> another_mono16bit(mono16bit);
+        Audio<std::pair<int8_t, int8_t>> stereo8bit(stereo8bit);
+        Audio<std::pair<int16_t, int16_t>> stereo16bit(stereo16bit);
+        Audio<std::pair<int8_t, int8_t>> another_stereo8bit(another_sample_array_8_2, sample_rate);
+        Audio<std::pair<int16_t, int16_t>> another_stereo16bit(another_sample_array_16_2, sample_rate);
+
+        std::vector<int8_t> sample_array_8_1_expected = {6, 6, 6, 6, 6};
+        std::vector<int16_t> sample_array_16_1_expected = {5, 4, 3, 2, 1, 5, 4, 3, 2, 1};
+        ;
+        std::vector<std::pair<int8_t, int8_t>> sample_array_8_2_expected =
+            {
+                std::make_pair(6, 7),
+                std::make_pair(6, 9),
+                std::make_pair(6, 11),
+                std::make_pair(6, 13),
+                std::make_pair(6, 14)};
+        std::vector<std::pair<int16_t, int16_t>> sample_array_16_2_expected =
+            {
+                std::make_pair(6, 7),
+                std::make_pair(6, 9),
+                std::make_pair(6, 11),
+                std::make_pair(6, 13),
+                std::make_pair(6, 14)};
+        std::pair<int,int> range1 = std::make_pair(0, 4);
+        std::pair<int, int> range2 = std::make_pair(5, 9);
+
+        mono8bit.add(another_mono8bit,range1,range2);
+        mono16bit.add(another_mono16bit,range1,range2);
+        stereo8bit.add(another_stereo8bit, range1, range2);
+        stereo8bit.add(another_stereo8bit, range1, range2);
+
+        REQUIRE(mono8bit.getData() == sample_array_8_1_expected);
+        REQUIRE(mono16bit.getData() == sample_array_16_1_expected);
+        REQUIRE(stereo8bit.getData() == sample_array_8_2_expected);
+        REQUIRE(stereo16bit.getData() == sample_array_16_2_expected);
+
+}
+
 
 TEST_CASE("Test fade in"){
         REQUIRE(1==0);
