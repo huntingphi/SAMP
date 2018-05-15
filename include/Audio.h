@@ -28,9 +28,10 @@ class Audio
     bool operator==(const Audio&) const;
     std::vector<T> getData() const;
     Audio operator|(const Audio &);
-    Audio operator+(const Audio &);
-    Audio &operator^(const std::pair<float, float>);
+    Audio &operator+(const Audio &);
+    Audio &operator^(const std::pair<int, int>);
     Audio &operator*(const std::pair<float, float>);
+    void normalize(std::pair<float,float> rms_desired);
     void reverse();
     float computeRMS();
     std::pair<float,float> computeStereoRMS();
@@ -117,25 +118,87 @@ template <typename T>
 Audio<T> Audio<T>::operator|(const Audio &){
 
 }
-template <typename T>
-Audio<T> Audio<T>::operator+(const Audio &){
 
+template<typename T>
+T clamp(T val)
+{
+    if (val > std::numeric_limits<T>::max())
+        return std::numeric_limits<T>::max();
+    return val;
 }
 template <typename T>
-Audio<T>& Audio<T>::operator^(const std::pair<float, float>){
-    
+Audio<T>& Audio<T>::operator+(const Audio &other){
+    for (std::vector<int>::size_type i = 0; i != data.size(); i++)
+    {
+        data[i] = clamp(data[i]+other.data[i]);
+    }
 }
+template <>
+Audio<std::pair<int8_t, int8_t>>& Audio<std::pair<int8_t, int8_t>>::operator+(const Audio &other)
+{
+    for (std::vector<int>::size_type i = 0; i != data.size(); i++)
+    {
+        // other.data
+        data[i].first = clamp(data[i].first + other.data[i].first);
+        data[i].second = clamp(data[i].second + other.data[i].second);
+        }
+}
+
+template <>
+Audio<std::pair<int16_t, int16_t>>& Audio<std::pair<int16_t, int16_t>>::operator+(const Audio &other)
+{
+    for (std::vector<int>::size_type i = 0; i != data.size(); i++)
+    {
+        other.getData();
+        data[i].first = clamp(data[i].first + other.data[i].first);
+        data[i].second = clamp(data[i].second + other.data[i].second);
+    }
+}
+
 template <typename T>
-Audio<T>& Audio<T>::operator*(const std::pair<float, float>){
-    
+Audio<T>& Audio<T>::operator^(const std::pair<int, int> range){
+    int i,f;
+    range.first<0? i=0:i=range.first;
+    range.second>=data.size()? f = size:f=range.second+1;
+    std::vector<T>(data.begin() + i, data.begin()+f).swap(data);//Use swap for memory efficiency
+    size = data.size();
+}
+class factor
+{
+    private:
+        std::pair<float, float> f;
+    public:
+    factor(std::pair<float, float> vol_factor):f(vol_factor){}
+    std::pair<int8_t,int8_t> operator()(std::pair<int8_t,int8_t> element)const
+    {
+        return std::make_pair(element.first * f.first, element.second * f.second);
+    }
+
+    int8_t operator()(int8_t element)const
+    {
+        return element * f.first;
+    }
+
+    std::pair<int16_t, int16_t> operator()(std::pair<int16_t, int16_t> element)const
+    {
+        return std::make_pair(element.first * f.first, element.second * f.second);
+    }
+
+    int16_t operator()(int16_t element)const
+    {
+        return element * f.first;
+    }
+};
+
+template <typename T>
+Audio<T>& Audio<T>::operator*(const std::pair<float, float> volfactor){
+    std::transform(data.begin(),data.end(),data.begin(),factor(volfactor));
 }
 template <typename T>
 void Audio<T>::reverse()
 {
     std::reverse(data.begin(),data.end());
 }
-
-
 template <>
 std::pair<float, float> Audio<std::pair<int8_t, int8_t>>::computeStereoRMS()
 {
@@ -150,7 +213,7 @@ std::pair<float, float> Audio<std::pair<int8_t, int8_t>>::computeStereoRMS()
     int right_sum = std::accumulate(right_data.begin(), right_data.end(), 0.0f, [](int total, int8_t i) { return total += pow(i, 2); });
     // std::cout << left_sum << std::endl;
     // std::cout << right_sum << std::endl;
-    return std::make_pair((float)left_sum / (float)size,(float)right_sum / (float)size);
+    return std::make_pair((float)std::sqrt((float) left_sum / (float)data.size()), (float)std::sqrt((float)right_sum / (float)size));
 }
 
 template<>
@@ -170,21 +233,87 @@ std::pair<float, float> Audio<std::pair<int16_t,int16_t>>::computeStereoRMS()
     int left_sum = std::accumulate(left_data.begin(), left_data.end(), 0.0f, [](int total, int16_t i) { return total += pow(i, 2); });
     int right_sum = std::accumulate(right_data.begin(), right_data.end(), 0.0f, [](int total, int16_t i) { return total += pow(i, 2); });
 
-    return std::make_pair((float)left_sum / (float)size, (float)right_sum / (float)size);
+    return std::make_pair((float)std::sqrt((float)left_sum / (float)size), (float)std::sqrt((float) right_sum / (float)size));
 }
 
 template <>
 float Audio<int8_t>::computeRMS()
 {
     int sum = std::accumulate(data.begin(), data.end(), 0.0f, [](int total, int8_t i) { return total += pow(i, 2); });
-    return (float)sum/size;
+    return (float)std::sqrt(sum/size);
 }
 template <>
 float Audio<int16_t>::computeRMS()
 {
     int sum = std::accumulate(data.begin(), data.end(), 0.0f, [](int total, int16_t i) { return total += pow(i, 2); });
-    return (float)sum / size;
+    return (float)std::sqrt((float)sum / size);
 }
+
+class normal
+{
+  private:
+    std::pair<float, float> rms_current;
+    std::pair<float, float> rms_desired;
+    int8_t clamp8(float val)
+    {
+        if(val>std::numeric_limits<int8_t>::max())return (int8_t)std::numeric_limits<int8_t>::max();
+        return (int8_t)val;
+        }
+    int16_t clamp16(float val)
+    {
+        if (val > std::numeric_limits<int16_t>::max())
+             return (int16_t) std::numeric_limits<int16_t>::max();
+         return (int16_t) val;
+        
+    }
+
+  public:
+    normal(std::pair<float, float> rms_d, std::pair<float, float> rms_c) : rms_desired(rms_d), rms_current(rms_c) {}
+    std::pair<int8_t, int8_t> operator()(std::pair<int8_t, int8_t> element)
+    {
+        return std::make_pair(clamp8(element.first * (rms_desired.first / rms_current.first)), clamp8(element.second * (rms_desired.second / rms_current.second)));
+    }
+
+    int8_t operator()(int8_t element)
+    {
+    return clamp8(element * (rms_desired.first / rms_current.first));
+    }
+
+    std::pair<int16_t, int16_t> operator()(std::pair<int16_t, int16_t> element)
+    {
+        return std::make_pair(clamp16(element.first * (rms_desired.first / rms_current.first)), clamp16(element.first * (rms_desired.second / rms_current.second)));
+    }
+
+    int16_t operator()(int16_t element)
+    {
+        return clamp16(element * (rms_desired.first / rms_current.first));
+    }
+};
+
+template <>
+void Audio<std::pair<int8_t, int8_t>>::normalize(std::pair<float, float> rms_desired)
+{
+    std::transform(data.begin(), data.end(), data.begin(), normal(rms_desired,computeStereoRMS()));
+}
+
+template <>
+void Audio<std::pair<int16_t, int16_t>>::normalize(std::pair<float, float> rms_desired)
+{
+    std::transform(data.begin(), data.end(), data.begin(), normal(rms_desired, computeStereoRMS()));
+}
+
+template <>
+void Audio<int8_t>::normalize(std::pair<float, float> rms_desired)
+{
+    std::transform(data.begin(), data.end(), data.begin(), normal(rms_desired, std::make_pair(computeRMS(),0.0f)));
+}
+
+template <>
+void Audio<int16_t>::normalize(std::pair<float, float> rms_desired)
+{
+    std::transform(data.begin(), data.end(), data.begin(), normal(rms_desired, std::make_pair(computeRMS(),0.0f)));
+}
+
 
 
 template <typename T>

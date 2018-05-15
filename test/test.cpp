@@ -192,14 +192,53 @@ TEST_CASE("Test compute rms"){
         Audio<std::pair<int8_t, int8_t>> stereo8bit_result(stereo8bit);
         Audio<std::pair<int16_t, int16_t>> stereo16bit_result(stereo16bit);
 
-        REQUIRE(mono8bit_result.computeRMS() == 11.0f);
-        REQUIRE(mono16bit_result.computeRMS() == 11.0f);
-        REQUIRE(stereo8bit_result.computeStereoRMS() == std::make_pair((float)38.5,(float)38.5));
-        REQUIRE(stereo16bit_result.computeStereoRMS() == std::make_pair((float)38.5, (float)38.5));
+        REQUIRE(mono8bit_result.computeRMS() == (float)std::sqrt(11.0f));
+        REQUIRE(mono16bit_result.computeRMS() == (float)std::sqrt(11.0f));
+        REQUIRE(stereo8bit_result.computeStereoRMS() == std::make_pair((float)std::sqrt(38.5), (float)std::sqrt(38.5)));
+        REQUIRE(stereo16bit_result.computeStereoRMS() == std::make_pair((float)std::sqrt(38.5), (float)std::sqrt(38.5)));
 }
 
+// 3 4 5 6
+// 4 5 6 7
 TEST_CASE("Test cut"){
-        REQUIRE(1==0);
+        Audio<int8_t> mono8bit_result(mono8bit);
+        Audio<int16_t> mono16bit_result(mono16bit);
+        Audio<std::pair<int8_t, int8_t>> stereo8bit_result(stereo8bit);
+        Audio<std::pair<int16_t, int16_t>> stereo16bit_result(stereo16bit);
+        std::vector<int8_t> result_8_1 = { 4, 5, 1, 2};
+        std::vector<int16_t> result_16_1 = { 4, 5, 1, 2};
+        std::vector<std::pair<int8_t, int8_t>> result_8_2 = {  std::make_pair(4, 4), std::make_pair(5, 5), std::make_pair(6, 6), std::make_pair(7, 7)};
+        std::vector<std::pair<int16_t, int16_t>> result_16_2 = {  std::make_pair(4, 4), std::make_pair(5, 5), std::make_pair(6, 6), std::make_pair(7, 7)};
+        mono8bit_result^std::make_pair(3,6);
+        mono16bit_result ^ std::make_pair(3, 6);
+        stereo8bit_result ^ std::make_pair(3, 6);
+        stereo16bit_result ^ std::make_pair(3, 6);
+
+        REQUIRE(mono8bit_result.getData()==result_8_1);
+        REQUIRE(mono16bit_result.getData() == result_16_1);
+        REQUIRE(stereo8bit_result.getData()==result_8_2);
+        REQUIRE(stereo16bit_result.getData() == result_16_2);
+        //Edge cases
+        mono8bit_result ^ std::make_pair(-1, result_8_1.size());
+        mono16bit_result ^ std::make_pair(-1, result_8_2.size());
+        stereo8bit_result ^ std::make_pair(-1, result_16_1.size());
+        stereo16bit_result ^ std::make_pair(-1, result_16_2.size());
+
+        REQUIRE(mono8bit_result.getData() == result_8_1);
+        REQUIRE(mono16bit_result.getData() == result_16_1);
+        REQUIRE(stereo8bit_result.getData() == result_8_2);
+        REQUIRE(stereo16bit_result.getData() == result_16_2);
+
+//Edge cases
+        mono8bit_result ^ std::make_pair(0, result_8_1.size()-1);
+        mono16bit_result ^ std::make_pair(0, result_8_2.size()-1);
+        stereo8bit_result ^ std::make_pair(0, result_16_1.size()-1);
+        stereo16bit_result ^ std::make_pair(0, result_16_2.size()-1);
+
+        REQUIRE(mono8bit_result.getData() == result_8_1);
+        REQUIRE(mono16bit_result.getData() == result_16_1);
+        REQUIRE(stereo8bit_result.getData() == result_8_2);
+        REQUIRE(stereo16bit_result.getData() == result_16_2);
 }
 
 TEST_CASE("Test ranged add"){
@@ -211,16 +250,85 @@ TEST_CASE("Test concatinate"){
 }
 
 TEST_CASE("Test volume factor"){
-        REQUIRE(1==0);
+        std::vector<int8_t>result_8_1 = {0, 1, 1, 2, 2, 0, 1, 1, 2, 2};
+        std::vector<int16_t>result_16_1 = {0, 1, 1, 2, 2, 0, 1, 1, 2, 2};
+        std::vector<std::pair<int8_t, int8_t>> result_8_2 = {std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(1, 3), std::make_pair(2, 4), std::make_pair(2, 5), std::make_pair(3, 6), std::make_pair(3, 7), std::make_pair(4, 8), std::make_pair(4, 9), std::make_pair(5, 10)};
+        std::vector<std::pair<int16_t, int16_t>>result_16_2 = {std::make_pair(1, 1), std::make_pair(2, 2), std::make_pair(3, 3), std::make_pair(4, 4), std::make_pair(5, 5), std::make_pair(6, 6), std::make_pair(7, 7), std::make_pair(8, 8), std::make_pair(9, 9), std::make_pair(10, 10)};
+
+        Audio<int8_t> mono8bit_result(mono8bit);
+        Audio<int16_t> mono16bit_result(mono16bit);
+        Audio<std::pair<int8_t, int8_t>> stereo8bit_result(stereo8bit);
+        Audio<std::pair<int16_t, int16_t>> stereo16bit_result(stereo16bit);
+        mono8bit_result * std::make_pair(0.5f, 1.0f);
+        mono16bit_result *std::make_pair(0.5f, 1.0f);
+        stereo8bit_result * std::make_pair(0.5f, 1.0f);
+        stereo16bit_result *std::make_pair(1.0f, 1.0f);
+
+        REQUIRE(mono8bit_result.getData() == result_8_1);
+        REQUIRE(mono16bit_result.getData() == result_16_1);
+        REQUIRE(stereo8bit_result.getData() == result_8_2);
+        REQUIRE(stereo16bit_result.getData() == result_16_2);
 }
 
 
 TEST_CASE("Test normalisation"){
-        REQUIRE(1==0);
+        Audio<int8_t> mono8bit_result(mono8bit);
+        Audio<int16_t> mono16bit_result(mono16bit);
+        Audio<std::pair<int8_t, int8_t>> stereo8bit_result(stereo8bit);
+        Audio<std::pair<int16_t, int16_t>> stereo16bit_result(stereo16bit);
+
+        REQUIRE(mono8bit_result.computeRMS() == Approx((float)std::sqrt(11.0f)));
+        REQUIRE(mono16bit_result.computeRMS() == Approx((float)std::sqrt(11.0f)));
+        REQUIRE(stereo8bit_result.computeStereoRMS() == std::make_pair((float)std::sqrt(38.5), (float)std::sqrt(38.5)));
+        REQUIRE(stereo16bit_result.computeStereoRMS() == std::make_pair((float)std::sqrt(38.5), (float)std::sqrt(38.5)));
+
+        mono8bit_result.normalize(std::make_pair(6.0f,0.0f));
+        mono16bit_result.normalize(std::make_pair(6.0f,0.0f));
+        stereo8bit_result.normalize(std::make_pair(20.0f,20.0f));
+        stereo16bit_result.normalize(std::make_pair(20.0f,20.0f));
+
+
+
+        Approx norm_rms_mono_8 = Approx(6.0f).epsilon(0.1);
+        Approx norm_rms_mono_16 = Approx(6.0f).epsilon(0.1);
+        Approx norm_rms_stereo_16_1 = Approx(20.0f).epsilon(0.1);
+        Approx norm_rms_stereo_16_2 = Approx(20.0f).epsilon(0.1);
+        Approx norm_rms_stereo_8_1 = Approx(20.0f).epsilon(0.1);
+        Approx norm_rms_stereo_8_2 = Approx(20.0f).epsilon(0.1);
+
+        REQUIRE(mono8bit_result.computeRMS() == norm_rms_mono_8);
+        REQUIRE(mono16bit_result.computeRMS() == norm_rms_mono_16);
+        REQUIRE(stereo8bit_result.computeStereoRMS().first == norm_rms_stereo_8_1);
+        REQUIRE(stereo8bit_result.computeStereoRMS().second == norm_rms_stereo_8_2);
+        REQUIRE(stereo16bit_result.computeStereoRMS().first == norm_rms_stereo_16_2);
+        REQUIRE(stereo16bit_result.computeStereoRMS().second == norm_rms_stereo_16_2);
 }
 
-TEST_CASE("Test fade in"){
-        REQUIRE(1==0);
+TEST_CASE("Test +operator"){
+        std::vector<int8_t> result_8_1 = {2, 4, 6, 8, 10, 2, 4, 6, 8, 10};
+        std::vector<int16_t> result_16_1 = {2, 4, 6, 8, 10, 2, 4, 6, 8, 10};
+        std::vector<std::pair<int8_t, int8_t>> result_8_2 = {std::make_pair(2, 2), std::make_pair(4, 4), std::make_pair(6, 6), std::make_pair(8, 8), std::make_pair(10, 10), std::make_pair(12, 12), std::make_pair(14, 14), std::make_pair(16, 16), std::make_pair(18, 18), std::make_pair(20, 20)};
+        std::vector<std::pair<int16_t, int16_t>> result_16_2 = {std::make_pair(2, 2), std::make_pair(4, 4), std::make_pair(6, 6), std::make_pair(8, 8), std::make_pair(10, 10), std::make_pair(12, 12), std::make_pair(14, 14), std::make_pair(16, 16), std::make_pair(18, 18), std::make_pair(20, 20)};
+
+        Audio<int8_t> mono8bit_to_add_1(mono8bit);
+        Audio<int16_t> mono16bit_to_add_1(mono16bit);
+        Audio<std::pair<int8_t, int8_t>> stereo8bit_to_add_1(stereo8bit);
+        Audio<std::pair<int16_t, int16_t>> stereo16bit_to_add_1(stereo16bit);
+
+        Audio<int8_t> mono8bit_to_add_2(mono8bit);
+        Audio<int16_t> mono16bit_to_add_2(mono16bit);
+        Audio<std::pair<int8_t, int8_t>> stereo8bit_to_add_2(stereo8bit);
+        Audio<std::pair<int16_t, int16_t>> stereo16bit_to_add_2(stereo16bit);
+
+        Audio<int8_t> mono8bit_result = mono8bit_to_add_1+mono8bit_to_add_2;
+        Audio<int16_t> mono16bit_result = mono16bit_to_add_1 + mono16bit_to_add_2;
+        Audio<std::pair<int8_t, int8_t>> stereo8bit_result = stereo8bit_to_add_1 + stereo8bit_to_add_2;
+        Audio<std::pair<int16_t, int16_t>> stereo16bit_result = stereo16bit_to_add_1 + stereo16bit_to_add_2;
+
+        REQUIRE(mono8bit_result.getData() == result_8_1);
+        REQUIRE(mono16bit_result.getData() == result_16_1);
+        REQUIRE(stereo8bit_result.getData() == result_8_2);
+        REQUIRE(stereo16bit_result.getData() == result_16_2);
 }
 
 TEST_CASE("Test fade out"){
