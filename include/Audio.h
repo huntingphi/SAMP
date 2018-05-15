@@ -146,8 +146,8 @@ std::pair<float, float> Audio<std::pair<int8_t, int8_t>>::computeStereoRMS()
         left_data.push_back(std::get<0>(p));
         right_data.push_back(std::get<1>(p));
         }
-    int8_t left_sum = std::accumulate(left_data.begin(), left_data.end(), 0.0f, [](int8_t total, int8_t i) { return total += pow(i, 2); });
-    int8_t right_sum = std::accumulate(right_data.begin(), right_data.end(), 0.0f, [](int8_t total, int8_t i) { return total += pow(i, 2); });
+    int left_sum = std::accumulate(left_data.begin(), left_data.end(), 0.0f, [](int total, int8_t i) { return total += pow(i, 2); });
+    int right_sum = std::accumulate(right_data.begin(), right_data.end(), 0.0f, [](int total, int8_t i) { return total += pow(i, 2); });
     // std::cout << left_sum << std::endl;
     // std::cout << right_sum << std::endl;
     return std::make_pair((float)left_sum / (float)size,(float)right_sum / (float)size);
@@ -167,8 +167,8 @@ std::pair<float, float> Audio<std::pair<int16_t,int16_t>>::computeStereoRMS()
         left_data.push_back(std::get<0>(p));
         right_data.push_back(std::get<1>(p));
     }
-    int16_t left_sum = std::accumulate(left_data.begin(), left_data.end(), 0.0f, [](int16_t total, int16_t i) { return total += pow(i, 2); });
-    int16_t right_sum = std::accumulate(right_data.begin(), right_data.end(), 0.0f, [](int16_t total, int16_t i) { return total += pow(i, 2); });
+    int left_sum = std::accumulate(left_data.begin(), left_data.end(), 0.0f, [](int total, int16_t i) { return total += pow(i, 2); });
+    int right_sum = std::accumulate(right_data.begin(), right_data.end(), 0.0f, [](int total, int16_t i) { return total += pow(i, 2); });
 
     return std::make_pair((float)left_sum / (float)size, (float)right_sum / (float)size);
 }
@@ -176,13 +176,13 @@ std::pair<float, float> Audio<std::pair<int16_t,int16_t>>::computeStereoRMS()
 template <>
 float Audio<int8_t>::computeRMS()
 {
-    int8_t sum = std::accumulate(data.begin(), data.end(), 0.0f, [](int8_t total, int8_t i) { return total += pow(i, 2); });
+    int sum = std::accumulate(data.begin(), data.end(), 0.0f, [](int total, int8_t i) { return total += pow(i, 2); });
     return (float)sum/size;
 }
 template <>
 float Audio<int16_t>::computeRMS()
 {
-    int16_t sum = std::accumulate(data.begin(), data.end(), 0.0f, [](int16_t total, int16_t i) { return total += pow(i, 2); });
+    int sum = std::accumulate(data.begin(), data.end(), 0.0f, [](int total, int16_t i) { return total += pow(i, 2); });
     return (float)sum / size;
 }
 
