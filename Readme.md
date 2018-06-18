@@ -2,7 +2,7 @@
 
 ## Brief
 
-Write a C++ application to process audio sound clips.
+An implementation of a C++ application to process audio sound clips.
 It should be possible to perform simple editing operations on audio such as cut and paste, and transforming the sound clips. Example transformations include fade in/out and [normalisation](#normalisation).
 The soundclips will be 1-channel (mono) or 2-channel (stereo) and will be provided as simple raw byte data which needs to be correctly interpreted.
 A raw sound file/clip is a sequence of [samples](#samples) (usually 8-, 16- or 24-bit) of an audio signal that can be sent to an audio speaker to produce sound. The audio also has a [sample rate.](#sample-rate) The higher the sample rate the better the quality of the sound produced. The number of bits per sample also affects audio quality. Higher bitrate results in better audio quality but also larger files. To balance this out compression is used, but is not neccessary in this prac. Simple raw (byte stream) audio will be used throughout.
